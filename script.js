@@ -1,4 +1,4 @@
-const API_KEY = "c8b9ab68a87b487e921d1ea4dbf8a5f5";
+const API_KEY = "5645d4542683472ca9644df5cbc1feb7"; // Updated API Key
 
 let currentRecipe = {}; // Stores the currently viewed recipe
 
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// FIXED: Search Now Works Correctly
+// Fetch recipes from Spoonacular API
 async function fetchRecipes() {
     let query = document.getElementById("searchQuery").value.trim();
     if (!query) {
@@ -47,7 +47,7 @@ async function fetchRecipes() {
     }
 }
 
-// FIXED: Display Function for Recipes
+// Display recipes in the UI
 function displayRecipes(recipes) {
     const container = document.getElementById("recipeContainer");
     container.innerHTML = "";
@@ -70,7 +70,7 @@ function displayRecipes(recipes) {
     });
 }
 
-// FIXED: Fetch Full Recipe Details for PDF
+// Fetch full recipe details for the modal
 async function fetchRecipeDetails(recipeId) {
     const url = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${API_KEY}`;
 
@@ -86,11 +86,13 @@ async function fetchRecipeDetails(recipeId) {
         currentRecipe = {
             id: data.id,
             title: data.title,
+            image: data.image,
             ingredients: data.extendedIngredients ? data.extendedIngredients.map(ing => ing.original) : [],
             instructions: data.instructions ? data.instructions.replace(/<\/?[^>]+(>|$)/g, "") : "Instructions not available."
         };
 
         document.getElementById("recipeTitle").innerText = currentRecipe.title;
+        document.getElementById("recipeImage").src = currentRecipe.image;
         document.getElementById("recipeIngredients").innerHTML = currentRecipe.ingredients
             .map(ing => `<li class="list-group-item">${ing}</li>`).join("");
         document.getElementById("recipeInstructions").innerText = currentRecipe.instructions;
@@ -103,54 +105,7 @@ async function fetchRecipeDetails(recipeId) {
     }
 }
 
-// FIXED: Download Recipe as PDF (Without Images)
-function downloadCurrentRecipeAsPDF() {
-    if (!currentRecipe.id || !currentRecipe.title) {
-        showToast("Error: Recipe details not fully loaded.", "danger");
-        return;
-    }
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text(currentRecipe.title, 10, 10);
-
-    generatePDFContent(doc, currentRecipe);
-}
-
-// FIXED: Generate PDF Content (No Images, Just Text)
-function generatePDFContent(doc, recipe) {
-    let yPosition = 20;
-    doc.setFontSize(14);
-    doc.text("Ingredients:", 10, yPosition);
-    yPosition += 10;
-
-    recipe.ingredients.forEach(ingredient => {
-        doc.text(`• ${ingredient}`, 15, yPosition);
-        yPosition += 7;
-    });
-
-    yPosition += 10;
-    doc.text("Instructions:", 10, yPosition);
-    yPosition += 10;
-
-    let splitInstructions = doc.splitTextToSize(recipe.instructions, 180);
-    splitInstructions.forEach(line => {
-        if (yPosition > 270) {
-            doc.addPage();
-            yPosition = 20;
-        }
-        doc.text(line, 10, yPosition);
-        yPosition += 7;
-    });
-
-    doc.save(`${recipe.title}.pdf`);
-    showToast(`Downloaded: ${recipe.title}`, "success");
-}
-
 // Show Toast Notification
 function showToast(message, type) {
-    const toastElement = new bootstrap.Toast(document.getElementById("toastMessage"));
-    document.getElementById("toastText").innerText = message;
-    toastElement.show();
+    alert(message); // Simple alert as fallback for debugging
 }
