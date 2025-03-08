@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// ✅ FIXED: Search Now Works Properly
+// FIXED: Search Now Works Properly
 async function fetchRecipes() {
     const query = document.getElementById("searchQuery").value.trim();
     if (!query) {
@@ -51,7 +51,7 @@ async function fetchRecipes() {
     }
 }
 
-// ✅ Display Recipes in Search Results
+// Display Recipes in Search Results
 function displayRecipes(recipes) {
     const container = document.getElementById("recipeContainer");
     container.innerHTML = "";
@@ -74,7 +74,7 @@ function displayRecipes(recipes) {
     });
 }
 
-// ✅ Get Recipe Details and Open Modal
+// Get Recipe Details and Open Modal
 async function fetchRecipeDetails(recipeId) {
     const url = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${API_KEY}`;
 
@@ -111,7 +111,7 @@ async function fetchRecipeDetails(recipeId) {
     }
 }
 
-// ✅ FIXED: Favorites Now Save & Display Properly
+// FIXED: Favorites Now Save & Display Properly
 function addToFavorites() {
     let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
@@ -125,7 +125,7 @@ function addToFavorites() {
     showToast(`${currentRecipe.title} added to favorites!`, "success");
 }
 
-// ✅ Load & Display Favorites in `favorites.html`
+// Load & Display Favorites in `favorites.html`
 function loadFavorites() {
     const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
     const container = document.getElementById("favoritesContainer");
@@ -155,7 +155,7 @@ function loadFavorites() {
     });
 }
 
-// ✅ Remove Recipe from Favorites
+//  Remove Recipe from Favorites
 function removeFromFavorites(recipeId) {
     let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
     favorites = favorites.filter(recipe => recipe.id !== recipeId);
@@ -164,7 +164,7 @@ function removeFromFavorites(recipeId) {
     showToast("Recipe removed from favorites.", "warning");
 }
 
-// ✅ FIXED: Download Favorites as PDFs (Images Included)
+//  FIXED: Download Favorites as PDFs (Images Included)
 function downloadFavoritesAsPDFs() {
     const { jsPDF } = window.jspdf;
     let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
@@ -218,7 +218,7 @@ function downloadFavoritesAsPDFs() {
     showToast("Favorites downloaded as PDFs!", "success");
 }
 
-// ✅ Show Toast Notification
+// Show Toast Notification
 function showToast(message, type) {
     const toastElement = new bootstrap.Toast(document.getElementById("toastMessage"));
     document.getElementById("toastText").innerText = message;
