@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Finder with Ingredients</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #recipeContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .recipe {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            background: #f9f9f9;
+        }
+        .recipe img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+        .ingredients {
+            display: none;
+            text-align: left;
+            padding: 10px;
+            font-size: 14px;
+        }
+        input {
+            padding: 10px;
+            width: 200px;
+            margin: 10px;
+        }
+        button {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .toggle-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
+        .toggle-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Recipe Finder</h1>
+    <input type="text" id="searchQuery" placeholder="Enter recipe name">
+    <button onclick="fetchRecipes()">Search</button>
+
+    <div id="recipeContainer"></div>
+
+    <script>
+        const API_KEY = "c8b9ab68a87b487e921d1ea4dbf8a5f5";  // Your provided API key
+
+        async function fetchRecipes() {
+            const query = document.getElementById("searchQuery").value;
+            if (!query) {
+                alert("Please enter a recipe name!");
+                return;
+            }
+
+            const url = `https://api.spoonacular.com/recipes/complexSearch?query=${query}&apiKey=${API_KEY}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.results || data.results.length === 0) {
+                    document.getElementById("recipeContainer").innerHTML = "<p>No recipes found.</p>";
+                    return;
+                }
+
+                displayRecipes(data.results);
+            } catch (error) {
+                console.error("Error fetching recipes:", error);
+                alert("Failed to fetch recipes. Please try again later.");
+            }
+        }
+
+        async function fetchIngredients(recipeId, ingredientListId) {
+            const url = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${API_KEY}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.extendedIngredients) {
+                    document.getElementById(ingredientListId).innerHTML = "<p>Ingredients not available.</p>";
+                    return;
+                }
+
+                const ingredients = data.extendedIngredients.map(ing => `<li>${ing.original}</li>`).join("");
+                document.getElementById(ingredientListId).innerHTML = `<ul>${ingredients}</ul>`;
+            } catch (error) {
+                console.error("Error fetching ingredients:", error);
+                document.getElementById(ingredientListId).innerHTML = "<p>Could not load ingredients.</p>";
+            }
+        }
+
+        function displayRecipes(recipes) {
+            const container = document.getElementById("recipeContainer");
+            container.innerHTML = "";
+
+            recipes.forEach(recipe => {
+                const recipeDiv = document.createElement("div");
+                recipeDiv.classList.add("recipe");
+
+                const ingredientListId = `ingredients-${recipe.id}`;
+
+                recipeDiv.innerHTML = `
+                    <h3>${recipe.title}</h3>
+                    <img src="${recipe.image}" alt="${recipe.title}">
+                    <p><a href="https://spoonacular.com/recipes/${recipe.title.replace(/\s+/g, '-').toLowerCase()}-${recipe.id}" target="_blank">View Recipe</a></p>
+                    <button class="toggle-btn" onclick="toggleIngredients(${recipe.id}, '${ingredientListId}')">Show Ingredients</button>
+                    <div class="ingredients" id="${ingredientListId}"></div>
+                `;
+
+                container.appendChild(recipeDiv);
+            });
+        }
+
+        function toggleIngredients(recipeId, ingredientListId) {
+            const ingredientDiv = document.getElementById(ingredientListId);
+
+            if (ingredientDiv.style.display === "none" || ingredientDiv.innerHTML === "") {
+                fetchIngredients(recipeId, ingredientListId);
+                ingredientDiv.style.display = "block";
+            } else {
+                ingredientDiv.style.display = "none";
+            }
+        }
+    </script>
+
+</body>
+</html>
