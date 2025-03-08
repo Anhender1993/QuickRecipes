@@ -13,13 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-
-    if (window.location.pathname.includes("favorites.html")) {
-        loadFavorites();
-    }
 });
 
-// Search function
+// FIXED: Search Now Works Correctly
 async function fetchRecipes() {
     let query = document.getElementById("searchQuery").value.trim();
     if (!query) {
@@ -28,7 +24,7 @@ async function fetchRecipes() {
     }
 
     let formattedQuery = query.split(",").map(item => item.trim()).join(",");
-    const url = `https://api.spoonacular.com/recipes/complexSearch?query=${formattedQuery}&number=10&apiKey=${API_KEY}`;
+    const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${formattedQuery}&number=10&apiKey=${API_KEY}`;
 
     try {
         const response = await fetch(url);
@@ -39,19 +35,19 @@ async function fetchRecipes() {
 
         const data = await response.json();
 
-        if (!data.results || data.results.length === 0) {
-            showToast("No recipes found for this search.", "warning");
+        if (!data || data.length === 0) {
+            showToast("No recipes found for these ingredients.", "warning");
             return;
         }
 
-        displayRecipes(data.results);
+        displayRecipes(data);
     } catch (error) {
         console.error("Fetch Error:", error);
         showToast("Network error. Please try again later.", "danger");
     }
 }
 
-// Display Function to Handle "View Details" Properly
+// FIXED: Display Function for Recipes
 function displayRecipes(recipes) {
     const container = document.getElementById("recipeContainer");
     container.innerHTML = "";
@@ -74,7 +70,7 @@ function displayRecipes(recipes) {
     });
 }
 
-// Recipe Details Load Properly
+// FIXED: Fetch Full Recipe Details for PDF
 async function fetchRecipeDetails(recipeId) {
     const url = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${API_KEY}`;
 
@@ -90,18 +86,14 @@ async function fetchRecipeDetails(recipeId) {
         currentRecipe = {
             id: data.id,
             title: data.title,
-            image: data.image,
-            ingredients: data.extendedIngredients.map(ing => ing.original),
+            ingredients: data.extendedIngredients ? data.extendedIngredients.map(ing => ing.original) : [],
             instructions: data.instructions ? data.instructions.replace(/<\/?[^>]+(>|$)/g, "") : "Instructions not available."
         };
 
         document.getElementById("recipeTitle").innerText = currentRecipe.title;
-        document.getElementById("recipeImage").src = currentRecipe.image;
         document.getElementById("recipeIngredients").innerHTML = currentRecipe.ingredients
             .map(ing => `<li class="list-group-item">${ing}</li>`).join("");
         document.getElementById("recipeInstructions").innerText = currentRecipe.instructions;
-
-        document.getElementById("favoriteButton").onclick = addToFavorites;
 
         const recipeModal = new bootstrap.Modal(document.getElementById("recipeModal"));
         recipeModal.show();
@@ -111,57 +103,49 @@ async function fetchRecipeDetails(recipeId) {
     }
 }
 
-// Add to Favorites (Now Saves & Persists Correctly)
-function addToFavorites() {
-    let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-
-    if (favorites.some(recipe => recipe.id === currentRecipe.id)) {
-        showToast("This recipe is already in your favorites!", "warning");
+// FIXED: Download Recipe as PDF (Without Images)
+function downloadCurrentRecipeAsPDF() {
+    if (!currentRecipe.id || !currentRecipe.title) {
+        showToast("Error: Recipe details not fully loaded.", "danger");
         return;
     }
 
-    favorites.push(currentRecipe);
-    localStorage.setItem("favorites", JSON.stringify(favorites));
-    showToast(`${currentRecipe.title} added to favorites!`, "success");
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text(currentRecipe.title, 10, 10);
+
+    generatePDFContent(doc, currentRecipe);
 }
 
-// Load Favorites (Now Displays on `favorites.html`)
-function loadFavorites() {
-    const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-    const container = document.getElementById("favoritesContainer");
+// FIXED: Generate PDF Content (No Images, Just Text)
+function generatePDFContent(doc, recipe) {
+    let yPosition = 20;
+    doc.setFontSize(14);
+    doc.text("Ingredients:", 10, yPosition);
+    yPosition += 10;
 
-    if (favorites.length === 0) {
-        container.innerHTML = "<p class='text-center text-muted'>No favorite recipes added yet.</p>";
-        return;
-    }
-
-    container.innerHTML = "";
-
-    favorites.forEach(recipe => {
-        const recipeDiv = document.createElement("div");
-        recipeDiv.classList.add("col-md-4", "mb-4");
-
-        recipeDiv.innerHTML = `
-            <div class="card shadow-sm">
-                <img src="${recipe.image}" class="card-img-top" alt="${recipe.title}">
-                <div class="card-body">
-                    <h5 class="card-title">${recipe.title}</h5>
-                    <button class="btn btn-danger" onclick="removeFromFavorites(${recipe.id})">Remove</button>
-                </div>
-            </div>
-        `;
-
-        container.appendChild(recipeDiv);
+    recipe.ingredients.forEach(ingredient => {
+        doc.text(`• ${ingredient}`, 15, yPosition);
+        yPosition += 7;
     });
-}
 
-// Remove Recipe from Favorites
-function removeFromFavorites(recipeId) {
-    let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-    favorites = favorites.filter(recipe => recipe.id !== recipeId);
-    localStorage.setItem("favorites", JSON.stringify(favorites));
-    loadFavorites();
-    showToast("Recipe removed from favorites.", "warning");
+    yPosition += 10;
+    doc.text("Instructions:", 10, yPosition);
+    yPosition += 10;
+
+    let splitInstructions = doc.splitTextToSize(recipe.instructions, 180);
+    splitInstructions.forEach(line => {
+        if (yPosition > 270) {
+            doc.addPage();
+            yPosition = 20;
+        }
+        doc.text(line, 10, yPosition);
+        yPosition += 7;
+    });
+
+    doc.save(`${recipe.title}.pdf`);
+    showToast(`Downloaded: ${recipe.title}`, "success");
 }
 
 // Show Toast Notification
