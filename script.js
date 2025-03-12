@@ -16,16 +16,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// Fetches recipes from the Spoonacular API
+// Fetches recipes from the Spoonacular API based on search type
 async function fetchRecipes() {
+    let searchType = document.getElementById("searchType").value;
     let query = document.getElementById("searchQuery").value.trim();
+
     if (!query) {
-        showToast("Please enter ingredients or a recipe name!", "warning");
+        showToast("Please enter a search term!", "warning");
         return;
     }
 
-    let formattedQuery = query.split(",").map(item => item.trim()).join(",");
-    const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${formattedQuery}&number=10&apiKey=${API_KEY}`;
+    let url = "";
+
+    if (searchType === "name") {
+        // Search by recipe name
+        url = `https://api.spoonacular.com/recipes/complexSearch?query=${query}&number=10&apiKey=${API_KEY}`;
+    } else if (searchType === "ingredients") {
+        // Search by ingredients (limit to 5)
+        let ingredientsArray = query.split(",").map(item => item.trim()).slice(0, 5);
+        let formattedQuery = ingredientsArray.join(",");
+        url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${formattedQuery}&number=10&apiKey=${API_KEY}`;
+    } else if (searchType === "genre") {
+        // Search by cuisine type (genre)
+        url = `https://api.spoonacular.com/recipes/complexSearch?cuisine=${query}&number=10&apiKey=${API_KEY}`;
+    }
 
     try {
         const response = await fetch(url);
@@ -36,11 +50,11 @@ async function fetchRecipes() {
 
         const data = await response.json();
         if (!data || data.length === 0) {
-            showToast("No recipes found for these ingredients.", "warning");
+            showToast("No recipes found. Try a different search term.", "warning");
             return;
         }
 
-        displayRecipes(data);
+        displayRecipes(data.results || data); // Adjust for different API responses
     } catch (error) {
         console.error("Fetch Error:", error);
         showToast("Network error. Please try again later.", "danger");
@@ -67,105 +81,6 @@ function displayRecipes(recipes) {
         `;
 
         container.appendChild(recipeDiv);
-    });
-}
-
-// Fetches full recipe details and displays them in a modal
-async function fetchRecipeDetails(recipeId) {
-    const url = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${API_KEY}`;
-
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            showToast(`Error fetching recipe details (${response.status})`, "danger");
-            return;
-        }
-
-        const data = await response.json();
-
-        currentRecipe = {
-            id: data.id,
-            title: data.title,
-            ingredients: data.extendedIngredients ? data.extendedIngredients.map(ing => ing.original) : [],
-            instructions: data.instructions ? data.instructions.replace(/<\/?[^>]+(>|$)/g, "") : "Instructions not available."
-        };
-
-        document.getElementById("recipeTitle").innerText = currentRecipe.title;
-        document.getElementById("recipeIngredients").innerHTML = currentRecipe.ingredients
-            .map(ing => `<li class="list-group-item">${ing}</li>`).join("");
-        document.getElementById("recipeInstructions").innerText = currentRecipe.instructions;
-
-        // Ensure the Export to DOCX button is properly set up
-        let modalFooter = document.querySelector(".modal-footer");
-        let exportButton = document.getElementById("exportDocxBtn");
-
-        if (!exportButton) {
-            exportButton = document.createElement("button");
-            exportButton.innerText = "Export to document (DOCX)";
-            exportButton.classList.add("btn", "btn-success");
-            exportButton.id = "exportDocxBtn";
-            modalFooter.appendChild(exportButton);
-        }
-
-        // Make sure the button always has a valid event listener
-        exportButton.onclick = exportRecipeToDOCX;
-
-        // Show the modal
-        const recipeModal = new bootstrap.Modal(document.getElementById("recipeModal"));
-        recipeModal.show();
-    } catch (error) {
-        console.error("Error fetching recipe details:", error);
-        showToast("Failed to load recipe details.", "danger");
-    }
-}
-
-// Exports the currently viewed recipe as a DOCX file
-function exportRecipeToDOCX() {
-    const { title, ingredients, instructions } = currentRecipe;
-
-    const doc = new docx.Document({
-        sections: [
-            {
-                properties: {},
-                children: [
-                    new docx.Paragraph({
-                        text: title,
-                        heading: docx.HeadingLevel.TITLE,
-                        spacing: { after: 300 }
-                    }),
-                    new docx.Paragraph({
-                        text: "Ingredients:",
-                        heading: docx.HeadingLevel.HEADING_1,
-                        spacing: { after: 100 }
-                    }),
-                    ...ingredients.map(ing =>
-                        new docx.Paragraph({
-                            text: `- ${ing}`,
-                            bullet: { level: 0 }
-                        })
-                    ),
-                    new docx.Paragraph({
-                        text: "Instructions:",
-                        heading: docx.HeadingLevel.HEADING_1,
-                        spacing: { before: 300, after: 100 }
-                    }),
-                    new docx.Paragraph({
-                        text: instructions,
-                        spacing: { after: 100 }
-                    })
-                ]
-            }
-        ]
-    });
-
-    docx.Packer.toBlob(doc).then(blob => {
-        const blobURL = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = blobURL;
-        a.download = `${title}.docx`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
     });
 }
 
