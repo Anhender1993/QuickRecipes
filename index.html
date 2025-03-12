@@ -1,53 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Search</title>
+    <meta charset="UTF-8"> <!-- Defines character encoding as UTF-8 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures proper scaling on mobile devices -->
+    <title>Recipe Search</title> <!-- Sets the title of the webpage -->
 
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap CSS for styling and responsive design -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css"> <!-- Links to an external stylesheet for custom styles -->
 </head>
-<body class="bg-light">
+<body class="bg-light"> <!-- Sets the background color to light using Bootstrap -->
 
+    <!-- Main content container -->
     <div class="container content-container">
-        <h1 class="mt-4">Recipe Finder</h1>
+        <h1 class="mt-4">Recipe Finder</h1> <!-- Page title with top margin -->
 
+        <!-- Search input field with a button to trigger recipe search -->
         <div class="input-group mb-3">
             <input type="text" id="searchQuery" class="form-control" placeholder="Enter ingredients or recipe name">
-            <button class="btn btn-primary" onclick="fetchRecipes()">Search</button>
+            <button class="btn btn-primary" onclick="fetchRecipes()">Search</button> <!-- Calls fetchRecipes() when clicked -->
         </div>
 
+        <!-- Container where recipe cards will be displayed -->
         <div id="recipeContainer" class="row justify-content-center mt-3"></div>
     </div>
 
-    <!-- Recipe Modal -->
+    <!-- Recipe details modal -->
     <div class="modal fade" id="recipeModal" tabindex="-1" aria-labelledby="recipeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg"> <!-- Defines a large modal dialog -->
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="recipeTitle"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="recipeTitle"></h5> <!-- Displays recipe title -->
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> <!-- Closes modal -->
                 </div>
                 <div class="modal-body">
-                    <img id="recipeImage" src="" class="img-fluid mb-3" alt="Recipe Image">
+                    <img id="recipeImage" src="" class="img-fluid mb-3" alt="Recipe Image"> <!-- Displays recipe image -->
                     <h6>Ingredients</h6>
-                    <ul id="recipeIngredients"></ul>
+                    <ul id="recipeIngredients"></ul> <!-- Displays recipe ingredients in a list -->
                     <h6>Instructions</h6>
-                    <p id="recipeInstructions"></p>
+                    <p id="recipeInstructions"></p> <!-- Displays recipe instructions -->
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="downloadCurrentRecipeAsPDF()">Download PDF</button>
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-secondary" onclick="downloadCurrentRecipeAsPDF()">Download PDF</button> <!-- Calls function to download recipe as PDF -->
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button> <!-- Closes modal -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS & jsPDF -->
+    <!-- Bootstrap JavaScript for interactivity -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
+    <script src="script.js"></script> <!-- Links external JavaScript file for functionality -->
 
 </body>
 </html>
