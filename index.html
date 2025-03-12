@@ -1,56 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"> <!-- Defines character encoding as UTF-8 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures proper scaling on mobile devices -->
-    <title>Recipe Search</title> <!-- Sets the title of the webpage -->
+    <meta charset="UTF-8"> <!-- Sets the character encoding for supporting special characters -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures mobile responsiveness -->
+    <title>Recipe Search</title> <!-- Sets the page title -->
 
-    <!-- Bootstrap CSS for styling and responsive design -->
+    <!-- Bootstrap CSS for layout and styling -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css"> <!-- Links to an external stylesheet for custom styles -->
+    <link rel="stylesheet" href="styles.css"> <!-- External CSS for custom styling -->
 </head>
-<body class="bg-light"> <!-- Sets the background color to light using Bootstrap -->
+<body class="bg-light"> <!-- Applies a light background color -->
 
-    <!-- Main content container -->
+    <!-- Main container for page content -->
     <div class="container content-container">
         <h1 class="mt-4">Recipe Finder</h1> <!-- Page title with top margin -->
 
-        <!-- Search input field with a button to trigger recipe search -->
+        <!-- Input field for searching recipes -->
         <div class="input-group mb-3">
             <input type="text" id="searchQuery" class="form-control" placeholder="Enter ingredients or recipe name">
-            <button class="btn btn-primary" onclick="fetchRecipes()">Search</button> <!-- Calls fetchRecipes() when clicked -->
+            <button class="btn btn-primary" onclick="fetchRecipes()">Search</button> <!-- Calls fetchRecipes() -->
         </div>
 
-        <!-- Container where recipe cards will be displayed -->
+        <!-- Container for displaying search results -->
         <div id="recipeContainer" class="row justify-content-center mt-3"></div>
     </div>
 
-    <!-- Recipe details modal -->
+    <!-- Modal for displaying detailed recipe information -->
     <div class="modal fade" id="recipeModal" tabindex="-1" aria-labelledby="recipeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg"> <!-- Defines a large modal dialog -->
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="recipeTitle"></h5> <!-- Displays recipe title -->
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> <!-- Closes modal -->
+                    <h5 class="modal-title" id="recipeTitle"></h5> <!-- Recipe title -->
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <img id="recipeImage" src="" class="img-fluid mb-3" alt="Recipe Image"> <!-- Displays recipe image -->
+                    <img id="recipeImage" src="" class="img-fluid mb-3" alt="Recipe Image"> <!-- Recipe image -->
                     <h6>Ingredients</h6>
-                    <ul id="recipeIngredients"></ul> <!-- Displays recipe ingredients in a list -->
+                    <ul id="recipeIngredients"></ul> <!-- Ingredients list -->
                     <h6>Instructions</h6>
-                    <p id="recipeInstructions"></p> <!-- Displays recipe instructions -->
+                    <p id="recipeInstructions"></p> <!-- Recipe instructions -->
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="downloadCurrentRecipeAsPDF()">Download PDF</button> <!-- Calls function to download recipe as PDF -->
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button> <!-- Closes modal -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JavaScript for interactivity -->
+    <!-- Bootstrap JS and custom script -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script> <!-- Links external JavaScript file for functionality -->
-
+    <script src="script.js"></script> <!-- Links the JavaScript file -->
 </body>
 </html>
